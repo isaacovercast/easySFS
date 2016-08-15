@@ -4,11 +4,11 @@ Convert VCF to dadi/fastsimcoal style SFS for demographic analysis
 This is a relatively simple script. It was created for use with VCF files from RAD-style datasets. VCF file formats differ pretty dramatically so ymmv. Right now it's been tested and seems to run fine for VCF as output by both pyrad/ipyrad and tassel. 
 
 ## Install & Run
-The script assumes you have matplotlib and dadi installed.
+The script assumes you have matplotlib and dadi installed. The easiest way is with `pip install dadi matplotlib`
 * Clone this repo
-** `git clone https://github.com/isaacovercast/easySFS.git`
+ * `git clone https://github.com/isaacovercast/easySFS.git`
 * `cd easySFS`
-* `chmod 777 easySFS`
+* `chmod 777 easySFS.py`
 * `./easySFS`
 
 ## General workflow
