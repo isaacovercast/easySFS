@@ -347,7 +347,7 @@ def parse_command_line():
     """)
 
     parser.add_argument("-a", dest="all_snps", action='store_true', 
-        help="Keep all snps (default == False)")
+        help="Keep all snps within each RAD locus (ie. do _not_ randomly sample 1 snp per locus).")
 
     parser.add_argument("-i", dest="vcf_name", required=True, 
         help="name of the VCF input file being converted")
