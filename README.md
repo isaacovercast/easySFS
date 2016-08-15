@@ -1,6 +1,8 @@
 # easySFS
 Convert VCF to dadi/fastsimcoal style SFS for demographic analysis
 
+This is a relatively simple script. It was created for use with VCF files from RAD-style datasets. VCF file formats differ pretty dramatically so ymmv. Right now it's been tested and seems to run fine for VCF as output by both pyrad/ipyrad and tassel. 
+
 ## Install & Run
 The script assumes you have matplotlib and dadi installed.
 * Clone this repo
@@ -29,6 +31,17 @@ Next run the script with the values for projecting for each population, like thi
 
 `./easySFS -i input.vcf -p pops_file.txt --proj 12,20`
 
+## Input files
+Two input files are required, the VCF and the population specification file. VCF in the format as written out by pyrad/ipyrad is known to work well, other vcf formats may work too, but aren't guaranteed. The population assignment file is a plain text file with two columns, one for sample names and one for the population the sample belongs to, like this:
+
+```
+sample1 pop1
+sample2 pop1
+sample3 pop2
+sample4 pop2
+```
+
+Only samples that are in both the pop file and the vcf file will be included in the final sfs.
 ## Outputs
 If you specify the `-o` flag you can pass in an output directory which will be created, otherwise output files are written to the default directory `output`. There will be two directories created here `dadi` and `fastsimcoal2`
 
