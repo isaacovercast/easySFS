@@ -23,7 +23,7 @@ pop2
 (2, 68.0)   (3, 96.0)   (4, 106.0)  (5, 110.0)  (6, 108.0)  (7, 89.0)   (8, 76.0)   (9, 66.0)   (10, 56.0)  (11, 49.0)  (12, 42.0)  (13, 39.0)  (14, 34.0)  (15, 29.0)  (16, 27.0)  (17, 26.0)  (18, 24.0)  (19, 23.0)  (20, 21.0)  (21, 22.0)  (22, 20.0)  (23, 19.0)  (24, 16.0)  (25, 16.0)  (26, 15.0)  (27, 15.0)  (28, 13.0)  (29, 13.0)  (30, 14.0)  (31, 14.0)  (32, 14.0)  (33, 13.0)  (34, 12.0)  (35, 9.0)   (36, 9.0)   (37, 8.0)   (38, 8.0)   (39, 8.0)   (40, 6.0)   (41, 6.0)   (42, 6.0)   (43, 5.0)   (44, 5.0)   (45, 5.0)   (46, 4.0)   (47, 4.0)   (48, 4.0)   (49, 3.0)   (50, 3.0)   (51, 3.0)   (52, 3.0)   (53, 3.0)   (54, 3.0)   (55, 2.0)   (56, 2.0)   (57, 2.0)   (58, 2.0)   (59, 2.0)   (60, 2.0)   (61, 2.0)   (62, 0.0)   (63, 0.0)   (64, 0.0)   (65, 0.0)   (66, 0.0)   (67, 0.0)   (68, 0.0)   (69, 0.0)   (70, 0.0)   (71, 0.0)   (72, 0.0)   (73, 0.0)   (74, 0.0)   (75, 0.0)   (76, 0.0)
 ```
 Each column is the number of samples in the projection and the number of segregating sites at that projection value.
-The dadi manual recommends maximinzing the number of segregating sites, but at the same time if you have lots of missing data then you might have to balance # of segregating sites against # of samples to avoid downsampling too far.
+The dadi manual recommends maximizing the number of segregating sites, but at the same time if you have lots of missing data then you might have to balance # of segregating sites against # of samples to avoid downsampling too far.
 
 Next run the script with the values for projecting for each population, like this:
 
@@ -33,10 +33,27 @@ Next run the script with the values for projecting for each population, like thi
 If you specify the `-o` flag you can pass in an output directory which will be created, otherwise output files are written to the default directory `output`. There will be two directories created here `dadi` and `fastsimcoal2`
 
 ## Running example files
+The example files are different enough where they will give you an idea of what most of the command line options do.
 
+### Diploid example
+* Diploid data
+* 2 populations
+* VCF only includes "independent" snps
 
+Preview: `./easySFS.py -i example_files/wcs_1200.vcf -p example_files/wcs_pops.txt --preview -a`
+Convert: `./easySFS.py -i example_files/wcs_1200.vcf -p example_files/wcs_pops.txt -a --proj=7,7`
 
+The `-a` flag specifies that all snps in the vcf should be used because this example file has already been subsampled for independent snps. Also, notice the `--ploidy` flag is not required since diploid is the default.
 
+### Haploid example
+* Haploid data
+* 3 populations
+* VCF includes all snps w/in each RAD locus
+
+Preview: `./easySFS.py -i example_files/leuco_1200.vcf -p example_files/leuco_pops.txt --ploidy 1`
+Convert: `./easySFS.py -i example_files/leuco_1200.vcf -p example_files/leuco_pops.txt --ploidy 1 --proj=8,10`
+
+Here the `--polidy` flag is required.
 ## Usage
 You can get usage info any time by: `./easySFS.py`
 ```
