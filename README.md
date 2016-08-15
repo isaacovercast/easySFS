@@ -43,6 +43,13 @@ sample4 pop2
 
 Only samples that are in both the pop file and the vcf file will be included in the final sfs.
 ## Outputs
+By default the script generates all 1D sfs per population, all pairwise joint sfs per population pair and one multiSFS for all populations.
+
+### Fastsimcoal2
+1D SFS will be named like this: `Pop1_MAFpop0.obs Pop2_MAFpop0.obs`<br>
+Joint SFS will be named like this: `prefix_jointMAFpop0_1.obs prefix_jointMAFpop0_2.obs prefix_jointMAFpop1_2.obs`<br>
+multiSFS will will be named like this: `prefix_MSFS.obs`
+
 If you specify the `-o` flag you can pass in an output directory which will be created, otherwise output files are written to the default directory `output`. There will be two directories created here `dadi` and `fastsimcoal2`
 
 ## Running example files
