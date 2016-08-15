@@ -39,10 +39,11 @@ def dadi_preview_projections(dd, pops):
             fs =  dadi.Spectrum.from_data_dict(dd, [pop], [x], polarized=False)
             s = fs.S()
             seg_sites[x] = round(s)
-            print(x, end="\t")
+            print("({}, {})".format(x, round(s)), end="\t")
         print("")
-        for x in range(2,len(pops[pop])):
-            print(seg_sites[x], end="\t")
+        ## Old way that's a little uglier
+        #for x in range(2,len(pops[pop])):
+        #    print(seg_sites[x], end="\t")
         print("\n")
 
 
@@ -440,9 +441,11 @@ def main():
 
     ## Convert dataframe to dadi-style datadict
     dd = make_datadict(genotypes, pops=pops, ploidy=args.ploidy, verbose=args.verbose)
-    with open(os.path.join(args.outdir, "datadict.txt"), 'w') as outfile:
-        for x,y in dd.items():
-            outfile.write(x+str(y)+"\n")
+    ## Don't write the datadict to the file for preview mode
+    if not args.preview:
+        with open(os.path.join(args.outdir, "datadict.txt"), 'w') as outfile:
+            for x,y in dd.items():
+                outfile.write(x+str(y)+"\n")
     
     ## Do preview of various projections to determine good values
     if args.preview:
