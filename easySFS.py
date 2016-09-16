@@ -273,7 +273,7 @@ def get_inds_from_input(vcf_name, verbose):
     return indnames
 
     
-def check_inputs(ind2pop, indnames):
+def check_inputs(ind2pop, indnames, pops):
     ## Make sure all samples are present in both pops file and VCF, give the user the option
     ## to bail out if something is goofy
     pop_set = set(ind2pop.keys())
@@ -282,14 +282,28 @@ def check_inputs(ind2pop, indnames):
     if not pop_set == vcf_set:
         print("\nSamples in pops file not present in VCF: {}"\
             .format(", ".join(pop_set.difference(vcf_set))))
+        ## Remove the offending samples from ind2pop
+        map(ind2pop.pop, pop_set.difference(vcf_set))
         print("Samples in VCF not present in pops file: {}"\
             .format(", ".join(vcf_set.difference(pop_set))))
+
+        ## Remove the offending individuals from the pops dict
+        for k,v in pops.items():
+            for ind in pop_set.difference(vcf_set):
+                if ind in v:
+                    pops[k] = v.remove(ind)
+        ## Make sure to remove any populations that no longer have samples
+        for k, v in pops.items():
+            if not v:
+                print("Empty population, removing - {}".format(k))
+                pops.pop(k)
 
         cont = raw_input("\nContinue, excluding samples not in both pops file and VCF? (yes/no)\n")
         while not cont in ["yes", "no"]:
             cont = raw_input("\nContinue, excluding samples not in both pops file and VCF? (yes/no)\n")
         if cont == "no":
             sys.exit()
+    return ind2pop, indnames, pops
 
 
 def get_populations(pops_file, verbose=False):
@@ -433,7 +447,7 @@ def main():
     ## Check whether inds exist in the population mapping and input vcf
     ## files. Give the user an opportunity to bail if there is a mismatch.
     if not args.force:
-        check_inputs(ind2pop, indnames)
+        ind2pop, indnames, pops = check_inputs(ind2pop, indnames, pops)
 
     ## Reads the vcf and returns a pandas dataframe
     genotypes = read_input(args.vcf_name, all_snps=args.all_snps,
