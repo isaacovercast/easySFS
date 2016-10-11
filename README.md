@@ -104,3 +104,6 @@ optional arguments:
   -f                  Force overwriting directories and existing files.
   -v                  Set verbosity. Dump tons of info to the screen
 ```
+
+## Credits
+`easySFS` is kind of a loose wrapper around `dadi`, which I use for internal sfs representation, and much of the grunt work.
