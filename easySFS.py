@@ -21,7 +21,7 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 
 
-def dadi_preview_projections(dd, pops):
+def dadi_preview_projections(dd, pops, ploidy):
     msg = """
     Running preview mode. We will print out the results for # of segregating sites
     for multiple values of projecting down for each population. The dadi
@@ -35,7 +35,9 @@ def dadi_preview_projections(dd, pops):
     for pop in pops:
         print(pop)
         seg_sites = {}
-        for x in range(2,len(pops[pop])):
+        ## Calculate projections for up to 2 x the number of samples,
+        ## so this is assuming populations are diploid.
+        for x in range(2, ploidy*len(pops[pop])):
             fs =  dadi.Spectrum.from_data_dict(dd, [pop], [x], polarized=False)
             s = fs.S()
             seg_sites[x] = round(s)
@@ -164,7 +166,9 @@ def make_datadict(genotypes, pops, verbose=False, ploidy=1):
 
         calls = {}
         for pop in pops.keys():
-            pop_genotypes = [row[x] for x in pops[pop]]
+            ## If there is a bunch of info associated w/ each snp then
+            ## just carve it off for now.
+            pop_genotypes = [row[x].split(":")[0] for x in pops[pop]]
             ref_count = sum([x == "0/0" or x == "0|0" for x in pop_genotypes]) * ploidy
             alt_count = sum([x == "1/1" or x == "1|1" for x in pop_genotypes]) * ploidy
             ## Haploids shouldn't have hets in the vcf 
@@ -449,7 +453,7 @@ def main():
     
     ## Do preview of various projections to determine good values
     if args.preview:
-        dadi_preview_projections(dd, pops)
+        dadi_preview_projections(dd, pops, ploidy=args.ploidy)
         sys.exit()
 
     elif args.projections:
