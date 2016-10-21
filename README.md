@@ -63,22 +63,25 @@ The example files are different enough where they will give you an idea of what 
 ### Diploid example
 * Diploid data
 * 2 populations
-* VCF only includes "independent" snps
+* SFS includes all snps from w/in each locus
 
 Preview: `./easySFS.py -i example_files/wcs_1200.vcf -p example_files/wcs_pops.txt --preview -a`<br>
 Convert: `./easySFS.py -i example_files/wcs_1200.vcf -p example_files/wcs_pops.txt -a --proj=7,7`
 
-The `-a` flag specifies that all snps in the vcf should be used because this example file has already been subsampled for independent snps. Also, notice the `--ploidy` flag is not required since diploid is the default.
+The `-a` flag specifies that all snps in the vcf should be used. Also, notice the `--ploidy` 
+flag is not required since diploid is the default.
 
 ### Haploid example
 * Haploid data
 * 3 populations
-* VCF includes all snps w/in each RAD locus
+* SFS only includes one snp per RAD locus
 
 Preview: `./easySFS.py -i example_files/leuco_1200.vcf -p example_files/leuco_pops.txt --ploidy 1`<br>
 Convert: `./easySFS.py -i example_files/leuco_1200.vcf -p example_files/leuco_pops.txt --ploidy 1 --proj=8,10`
 
-Here the `--polidy` flag is required.
+Here the `--polidy` flag is required. In this example only one snp per locus
+will be randomly sampled for inclusion in the output sfs.
+
 ## Usage
 You can get usage info any time by: `./easySFS.py`
 ```
