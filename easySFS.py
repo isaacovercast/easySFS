@@ -12,6 +12,7 @@ import pandas as pd
 import numpy as np
 import argparse
 import shutil
+import gzip
 import copy
 import dadi
 import sys
@@ -193,7 +194,12 @@ def read_input(vcf_name, all_snps=False, verbose=False):
     cur_loc_number = -1
     cur_loc_snps = []
 
-    infile = open(vcf_name, 'r')
+    ## use gzip? 
+    if vcf_name.endswith(".gz"):
+        ofunc = gzip.open
+    else:  
+        ofunc = open
+    infile = ofunc(vcf_name, 'r')
     lines = infile.readlines()
     infile.close()
 
@@ -253,8 +259,13 @@ def get_inds_from_input(vcf_name, verbose):
     # Read in the vcf file and grab the line with the individual names
     # Add the 'U' to handle opening files in universal mode, squashes the
     # windows/mac/linux newline issue.
+    ## use gzip? 
+    if vcf_name.endswith(".gz"):
+        ofunc = gzip.open
+    else:  
+        ofunc = open
     try:
-        with open(vcf_name, 'rU') as infile:
+        with ofunc(vcf_name, 'rU') as infile:
             for line in infile:
                 if line.startswith('#'):
                     if line.startswith('#CHROM'):
