@@ -7,6 +7,7 @@ from __future__ import print_function
 import matplotlib
 matplotlib.use('PDF')
 from collections import Counter
+from collections import OrderedDict
 from itertools import combinations
 import pandas as pd
 import numpy as np
@@ -354,7 +355,7 @@ def get_populations(pops_file, verbose=False):
     try:
         with open(pops_file, 'rU') as popsfile:
             ind2pop = {}
-            pops = {}
+            pops = OrderedDict()
         
             lines = popsfile.readlines()
             ## Get all the populations
