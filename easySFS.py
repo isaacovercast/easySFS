@@ -193,8 +193,8 @@ def make_datadict(genotypes, pops, verbose=False, ploidy=1):
             ## If there is a bunch of info associated w/ each snp then
             ## just carve it off for now.
             pop_genotypes = [row[x].split(":")[0] for x in pops[pop]]
-            ref_count = sum([x == "0/0" or x == "0|0" for x in pop_genotypes]) * ploidy
-            alt_count = sum([x == "1/1" or x == "1|1" for x in pop_genotypes]) * ploidy
+            ref_count = sum([x == "0" or x == "0/0" or x == "0|0" for x in pop_genotypes]) * ploidy
+            alt_count = sum([x == "1" or x == "1/1" or x == "1|1" for x in pop_genotypes]) * ploidy
             ## Haploids shouldn't have hets in the vcf 
             het_count = sum([x == "1/0" or x == "1|0" for x in pop_genotypes])
 
