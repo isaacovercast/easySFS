@@ -58,7 +58,7 @@ def dadi_oneD_sfs_per_pop(dd, pops, proj, fold, outdir, prefix, dtype):
         print("Doing 1D sfs - {}".format(pop))
         dadi_sfs_file = os.path.join(dadi_dir, pop+"-"+str(proj[i])+".sfs")
 
-        fs = dadi.Spectrum.from_data_dict(dd, [pop], [proj[i]], mask_corners=False, polarized=fold)
+        fs = dadi.Spectrum.from_data_dict(dd, [pop], [proj[i]], mask_corners=True, polarized=fold)
 
         ## Do int bins rather than float
         if dtype == "int":
