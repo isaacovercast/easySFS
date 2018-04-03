@@ -530,7 +530,7 @@ def main():
         dadi_multiSFS(dd, pops, proj=proj, fold=args.unfolded, outdir=outdir, prefix=prefix, dtype=args.dtype)
 
     else:
-        print("Either --preview or -proj must be specified.")
+        print("Either --preview or --proj must be specified.")
 
 if __name__ == "__main__":
     main()
