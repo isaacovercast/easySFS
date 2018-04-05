@@ -283,6 +283,7 @@ def get_inds_from_input(vcf_name, verbose):
     # Add the 'U' to handle opening files in universal mode, squashes the
     # windows/mac/linux newline issue.
     ## use gzip? 
+    indnames = []
     if vcf_name.endswith(".gz"):
         ofunc = gzip.open
     else:  
@@ -308,6 +309,8 @@ def get_inds_from_input(vcf_name, verbose):
         print("Error - {}".format(inst))
         raise
 
+    if not indnames:
+        raise Exception("No sample names found in the input vcf. Check vcf file formatting.")
     return indnames
 
     
