@@ -51,14 +51,15 @@ def dadi_preview_projections(dd, pops, ploidy, fold):
         print("\n")
 
 
-def dadi_oneD_sfs_per_pop(dd, pops, proj, fold, outdir, prefix, dtype):
+def dadi_oneD_sfs_per_pop(dd, pops, proj, unfold, outdir, prefix, dtype):
     dadi_dir = os.path.join(outdir, "dadi")
     fsc_dir = os.path.join(outdir, "fastsimcoal2")
+    M_or_D = "D" if unfold else "M"
     for i, pop in enumerate(pops):
         print("Doing 1D sfs - {}".format(pop))
         dadi_sfs_file = os.path.join(dadi_dir, pop+"-"+str(proj[i])+".sfs")
 
-        fs = dadi.Spectrum.from_data_dict(dd, [pop], [proj[i]], mask_corners=True, polarized=fold)
+        fs = dadi.Spectrum.from_data_dict(dd, [pop], [proj[i]], mask_corners=True, polarized=unfold)
 
         ## Do int bins rather than float
         if dtype == "int":
@@ -68,7 +69,7 @@ def dadi_oneD_sfs_per_pop(dd, pops, proj, fold, outdir, prefix, dtype):
         fs.to_file(dadi_sfs_file)
 
         ## Convert each 1D sfs to fsc format
-        fsc_oneD_filename = os.path.join(fsc_dir, pop+"_MAFpop0.obs")
+        fsc_oneD_filename = os.path.join(fsc_dir, pop+"_{}AFpop0.obs".format(M_or_D))
         with open(fsc_oneD_filename, 'w') as outfile:
             outfile.write("1 observation\n")
             outfile.write("\t".join(["d0_"+str(x) for x in xrange(proj[i]+1)]) + "\n")
@@ -78,9 +79,10 @@ def dadi_oneD_sfs_per_pop(dd, pops, proj, fold, outdir, prefix, dtype):
                 outfile.write("\n")
 
 
-def dadi_twoD_sfs_combinations(dd, pops, proj, fold, outdir, prefix, dtype, verbose):
+def dadi_twoD_sfs_combinations(dd, pops, proj, unfold, outdir, prefix, dtype, verbose):
     dadi_dir = os.path.join(outdir, "dadi")
     fsc_dir = os.path.join(outdir, "fastsimcoal2")
+    M_or_D = "D" if unfold else "M"
     ## All combinations of pairs of populations
     popPairs = list(combinations(pops, 2))
     ## All combinations of corresponding projection values
@@ -97,7 +99,7 @@ def dadi_twoD_sfs_combinations(dd, pops, proj, fold, outdir, prefix, dtype, verb
     for i, pair in enumerate(popPairs):
         print("Doing 2D sfs - {}".format(pair))
         dadi_joint_filename = os.path.join(dadi_dir, "-".join(pair)+".sfs")
-        fs = dadi.Spectrum.from_data_dict(dd, list(pair), list(projPairs[i]), polarized=fold)
+        fs = dadi.Spectrum.from_data_dict(dd, list(pair), list(projPairs[i]), polarized=unfold)
 
         ## Do int bins rather than float
         if dtype == "int":
@@ -110,7 +112,7 @@ def dadi_twoD_sfs_combinations(dd, pops, proj, fold, outdir, prefix, dtype, verb
         ## NB: FSC joint format file names look like this: <prefix>_jointMAFpop1_0.obs
         ## Where the first pop specified is listed in the rows and the second pop
         ## specified is listed in the columns.
-        fsc_twoD_filename = os.path.join(fsc_dir, prefix+"_jointMAFpop{}_{}.obs".format(popidx[pair[0]], popidx[pair[1]]))
+        fsc_twoD_filename = os.path.join(fsc_dir, prefix+"_joint{}AFpop{}_{}.obs".format(M_or_D, popidx[pair[0]], popidx[pair[1]]))
         with open(fsc_twoD_filename, 'w') as outfile:
             outfile.write("1 observation\n")
             ## Format column headers (i.e. d0_0 d0_1 d0_2 .. d0_n for deme 0 up to sample size of n)
@@ -143,14 +145,14 @@ def dadi_twoD_sfs_combinations(dd, pops, proj, fold, outdir, prefix, dtype, verb
                     outfile.write(row_head + "\t" + " ".join(rows[i]) + "\n")
 
 
-def dadi_multiSFS(dd, pops, proj, fold, outdir, prefix, dtype):
+def dadi_multiSFS(dd, pops, proj, unfold, outdir, prefix, dtype):
     print("Doing multiSFS for all pops")
     dadi_dir = os.path.join(outdir, "dadi")
     fsc_dir = os.path.join(outdir, "fastsimcoal2")
     dadi_multi_filename = os.path.join(dadi_dir, "-".join(pops)+".sfs")
 
     ## Get the multiSFS
-    fs = dadi.Spectrum.from_data_dict(dd, pops, proj, polarized=fold)
+    fs = dadi.Spectrum.from_data_dict(dd, pops, proj, polarized=unfold)
 
     ## Do int bins rather than float
     if dtype == "int":
@@ -523,14 +525,14 @@ def main():
             sys.exit(msg)
 
         ## Create 1D sfs for each population
-        dadi_oneD_sfs_per_pop(dd, pops, proj=proj, fold=args.unfolded, outdir=outdir, prefix=prefix, dtype=args.dtype)
+        dadi_oneD_sfs_per_pop(dd, pops, proj=proj, unfold=args.unfolded, outdir=outdir, prefix=prefix, dtype=args.dtype)
 
         ## Create pairwise 2D sfs for each population
-        dadi_twoD_sfs_combinations(dd, pops, proj=proj, fold=args.unfolded,\
+        dadi_twoD_sfs_combinations(dd, pops, proj=proj, unfold=args.unfolded,\
                                 outdir=outdir, prefix=prefix, dtype=args.dtype, verbose=args.verbose)
 
         ## Create the full multiSFS for all popuations combined
-        dadi_multiSFS(dd, pops, proj=proj, fold=args.unfolded, outdir=outdir, prefix=prefix, dtype=args.dtype)
+        dadi_multiSFS(dd, pops, proj=proj, unfold=args.unfolded, outdir=outdir, prefix=prefix, dtype=args.dtype)
 
     else:
         print("Either --preview or --proj must be specified.")
