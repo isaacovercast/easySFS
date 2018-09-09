@@ -198,7 +198,7 @@ def make_datadict(genotypes, pops, verbose=False, ploidy=1):
             ref_count = sum([x == "0" or x == "0/0" or x == "0|0" for x in pop_genotypes]) * ploidy
             alt_count = sum([x == "1" or x == "1/1" or x == "1|1" for x in pop_genotypes]) * ploidy
             ## Haploids shouldn't have hets in the vcf 
-            het_count = sum([x == "1/0" or x == "1|0" for x in pop_genotypes])
+            het_count = sum([x == "1/0" or x == "0/1" or x == "1|0" or x == "0|1" for x in pop_genotypes])
 
             ref_count += het_count
             alt_count += het_count
