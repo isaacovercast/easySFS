@@ -39,7 +39,8 @@ def dadi_preview_projections(dd, pops, ploidy, fold):
         seg_sites = {}
         ## Calculate projections for up to 2 x the number of samples,
         ## so this is assuming populations are diploid.
-        for x in range(2, ploidy*len(pops[pop])):
+        ## The +1 makes it possible to see preview including all samples per pop
+        for x in range(2, ploidy*len(pops[pop])+1):
             fs =  dadi.Spectrum.from_data_dict(dd, [pop], [x], polarized=fold)
             s = fs.S()
             seg_sites[x] = round(s)
