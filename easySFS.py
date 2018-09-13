@@ -170,6 +170,100 @@ def dadi_multiSFS(dd, pops, proj, unfold, outdir, prefix, dtype):
         with open(dadi_multi_filename) as infile:
             outfile.write(infile.readlines()[1])
             outfile.write("\n")
+    return dadi_multi_filename
+
+
+def dadi_to_momi(infile, outdir=None, verbose=False):
+    try:
+        import momi
+    except:
+        if verbose: print("Install momi to get momi-style sfs conversion as well.")
+        return
+    if not outdir == None:
+        momi_dir = os.path.join(outdir, "momi")
+        if not os.path.exists(momi_dir):
+            os.mkdir(momi_dir)
+        outfile = infile.split(".sfs")[0] + "_momi.sfs"
+        outfile = os.path.join(outdir, outfile.split("/")[-1])
+    else:
+        outfile = infile + "_momi.sfs"
+
+    dat = open(infile).readlines()
+    ## Get rid of comment lines
+    dat = [x.strip() for x in dat if not x.startswith("#")]
+    if not len(dat) == 3:
+        raise Exception("Malformed dadi sfs {}.\n  Must have 3 lines, yours has {}".format(infile, len(dat)))
+
+    ## Parse the info line into nsamps per pop (list of ints), folding flag, and pop names list (if they are given)
+    info = dat[0].split()
+    nsamps = []
+    ## Keep carving off values as long as they cast successfully as int
+    for i in info:
+        try:
+            nsamps.append(int(i))
+        except:
+            pass
+    nsamps = np.array(nsamps)
+    pops = [x.replace('"', '') for x in info[len(nsamps)+1:]]
+    folded = info[len(nsamps)]
+    folded = False if "un" in folded else True
+    if not len(pops) == len(nsamps):
+        print("Number of populations doesn't agree with number of pop names, using generic names.")
+        pops = ["pop"+x for x in range(len(nsamps))]
+    if verbose: print("Info nsamps={} folded={} pops={}".format(nsamps, folded, pops))
+
+    ## Get mask
+    mask = list(map(int, dat[2].split()))
+    if verbose: print(mask)
+
+    ## Get sfs, and reshape based on sample sizes
+    sfs = list(map(float, dat[1].split()))
+    if verbose: print(sfs)
+    length = np.ma.array(sfs, mask=mask).sum()
+    sfs = np.array(sfs).reshape(nsamps)
+    if verbose: print("length {}".format(length))
+    if verbose: print(sfs)
+
+    ## Get counts per sfs bin
+    counts = Counter()
+    for sfsbin in product(*[range(y) for y in [x for x in nsamps]]):
+        ## Ignore monomorphic snps
+        ## nsamps minus 1 here because of the off by one diff between number
+        ## of bins in the sfs and actual number of samples
+        if sfsbin == tuple(nsamps-1) or sfsbin == tuple([0] * len(nsamps)):
+            continue
+        ## ignore zero bin counts
+        if sfs[sfsbin] == 0:
+            continue
+        if verbose: print(sfsbin, sfs[sfsbin]),
+        counts.update({sfsbin:sfs[sfsbin]})
+    if verbose: print("nbins {}".format(len(counts)))
+
+    ## Convert SFS bin style into momi config style
+    configs = pd.DataFrame(index=range(len(counts)), columns=pops)
+ 
+    locus_info = []
+    for i, c in enumerate(counts):
+        ## (n-1) here because nbins in dadi sfs is n+1
+        cfg = np.array([[(n-1)-x, x] for x,n in zip(c, nsamps)])
+        configs.iloc[i] = [list(map(int, list(x))) for x in cfg]
+        locus_info.append([0, i, counts[c]])
+    if verbose: print("n_snps {}".format(np.sum([x[2] for x in locus_info])))
+
+    ## Finally build the momi style sfs dictionary and write it out
+    momi_sfs = {"sampled_pops":pops,
+        "folded":folded,
+        "length":int(length),
+        "configs":configs.values.tolist(),
+        "(locus,config_id,count)":locus_info}
+
+    with open(outfile, 'w') as out:
+        out.write("{}".format(json.dumps(momi_sfs)))
+    ## make it pretty
+    sfs = momi.Sfs.load(outfile)
+    ## Fold if unfolded
+    if folded: sfs = sfs.fold()
+    sfs.dump(outfile)
 
 
 def oneD_sfs_per_pop(dd, pops, outdir, prefix):
@@ -532,7 +626,16 @@ def main():
                                 outdir=outdir, prefix=prefix, dtype=args.dtype, verbose=args.verbose)
 
         ## Create the full multiSFS for all popuations combined
-        dadi_multiSFS(dd, pops, proj=proj, unfold=args.unfolded, outdir=outdir, prefix=prefix, dtype=args.dtype)
+        sfs_file = dadi_multiSFS(dd, pops, proj=proj, unfold=args.unfolded, outdir=outdir, prefix=prefix, dtype=args.dtype)
+
+        try:
+            import momi
+            ## Create momi-style sfs
+            dadi_to_momi(infile=sfs_file, outdir=outdir, verbose=args.verbose)
+        except:
+            ## Can't create momi file at this point because we're locked to python2 
+            ## because of dadi. 
+            pass
 
     else:
         print("Either --preview or --proj must be specified.")
