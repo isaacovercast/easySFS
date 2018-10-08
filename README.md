@@ -92,11 +92,12 @@ You can get usage info any time by: `./easySFS.py`
 ```
 usage: easySFS.py [-h] [-a] -i VCF_NAME -p POPULATIONS [--proj PROJECTIONS]
                   [--preview] [-o OUTDIR] [--ploidy PLOIDY] [--prefix PREFIX]
-                  [--GQ GQUAL] [-f] [-v]
+                  [--unfolded] [--dtype DTYPE] [--GQ GQUAL] [-f] [-v]
 
 optional arguments:
   -h, --help          show this help message and exit
-  -a                  Keep all snps (default == False)
+  -a                  Keep all snps within each RAD locus (ie. do _not_
+                      randomly sample 1 snp per locus).
   -i VCF_NAME         name of the VCF input file being converted
   -p POPULATIONS      Input file containing population assignments per
                       individual
@@ -108,6 +109,10 @@ optional arguments:
   --ploidy PLOIDY     Specify ploidy. Default is 2. Only other option is 1 for
                       haploid.
   --prefix PREFIX     Prefix for all output SFS files names.
+  --unfolded          Generate unfolded SFS. This assumes that your vcf file
+                      is accurately polarized.
+  --dtype DTYPE       Data type for use in output sfs. Options are `int` and
+                      `float`. Default is `float`.
   --GQ GQUAL          minimum genotype quality tolerated
   -f                  Force overwriting directories and existing files.
   -v                  Set verbosity. Dump tons of info to the screen
