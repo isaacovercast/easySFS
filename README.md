@@ -1,5 +1,5 @@
 # easySFS
-Convert VCF to dadi/fastsimcoal style SFS for demographic analysis
+Effective selection of population size projection for construction of the site frequency spectrum. Convert VCF to dadi/fastsimcoal style SFS for demographic analysis
 
 This is a relatively simple script. It was created for use with VCF files from RAD-style datasets. VCF file formats differ pretty dramatically so ymmv. Right now it's been tested and seems to run fine for VCF as output by both pyrad/ipyrad and tassel. 
 
