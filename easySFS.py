@@ -429,7 +429,8 @@ def check_inputs(ind2pop, indnames, pops):
         for k,v in pops.items():
             for ind in pop_set.difference(vcf_set):
                 if ind in v:
-                    pops[k] = v.remove(ind)
+                    v.remove(ind)
+                    pops[k] = v
         ## Make sure to remove any populations that no longer have samples
         for k, v in pops.items():
             if not v:
