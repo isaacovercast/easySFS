@@ -117,10 +117,10 @@ def dadi_twoD_sfs_combinations(dd, pops, proj, unfold, outdir, prefix, dtype, ve
         with open(fsc_twoD_filename, 'w') as outfile:
             outfile.write("1 observation\n")
             ## Format column headers (i.e. d0_0 d0_1 d0_2 .. d0_n for deme 0 up to sample size of n)
-            outfile.write("\t" + "\t".join(["d{}_".format(popidx[pair[0]]) + str(x) for x in xrange(projPairs[i][1]+1)]) + "\n") 
+            outfile.write("\t" + "\t".join(["d{}_".format(popidx[pair[1]]) + str(x) for x in xrange(projPairs[i][1]+1)]) + "\n") 
 
             ## Format row headers
-            row_headers = ["d{}_".format(popidx[pair[1]]) + str(x) for x in xrange(projPairs[i][0]+1)]
+            row_headers = ["d{}_".format(popidx[pair[0]]) + str(x) for x in xrange(projPairs[i][0]+1)]
             ## Read in the joint fs from dadi and format it nice for fsc
             with open(dadi_joint_filename) as infile:
                 ## Get the second line of the dadi-style sfs which contains the data
