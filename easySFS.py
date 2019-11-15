@@ -113,14 +113,14 @@ def dadi_twoD_sfs_combinations(dd, pops, proj, unfold, outdir, prefix, dtype, ve
         ## NB: FSC joint format file names look like this: <prefix>_jointMAFpop1_0.obs
         ## Where the first pop specified is listed in the rows and the second pop
         ## specified is listed in the columns.
-        fsc_twoD_filename = os.path.join(fsc_dir, prefix+"_joint{}AFpop{}_{}.obs".format(M_or_D, popidx[pair[1]], popidx[pair[0]]))
+        fsc_twoD_filename = os.path.join(fsc_dir, prefix+"_joint{}AFpop{}_{}.obs".format(M_or_D, popidx[pair[0]], popidx[pair[1]]))
         with open(fsc_twoD_filename, 'w') as outfile:
             outfile.write("1 observation\n")
             ## Format column headers (i.e. d0_0 d0_1 d0_2 .. d0_n for deme 0 up to sample size of n)
-            outfile.write("\t" + "\t".join(["d{}_".format(popidx[pair[0]]) + str(x) for x in range(projPairs[i][0]+1)]) + "\n") 
+            outfile.write("\t" + "\t".join(["d{}_".format(popidx[pair[0]]) + str(x) for x in range(projPairs[i][1]+1)]) + "\n") 
 
             ## Format row headers
-            row_headers = ["d{}_".format(popidx[pair[1]]) + str(x) for x in range(projPairs[i][1]+1)]
+            row_headers = ["d{}_".format(popidx[pair[1]]) + str(x) for x in range(projPairs[i][0]+1)]
             ## Read in the joint fs from dadi and format it nice for fsc
             with open(dadi_joint_filename) as infile:
                 ## Get the second line of the dadi-style sfs which contains the data
@@ -128,7 +128,7 @@ def dadi_twoD_sfs_combinations(dd, pops, proj, unfold, outdir, prefix, dtype, ve
                 ## The length of each row is determined by the number of columns which == the size of the projection for pop2
                 ## Have to add 1 to the value of the projection because range stops after 'n' elements
                 ## but we want all n+1 elements from 0,1,2,..,n
-                row_size = projPairs[i][0] + 1
+                row_size = projPairs[i][1] + 1
                 ## Slice the row data into evenly sized chunks based on the number of columns
                 rows = [row_data[i:i + row_size] for i in range(0, len(row_data), row_size)]
                 ## Sanity check. Make sure the number of rows you got is the same number you're expecting
