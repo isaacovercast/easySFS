@@ -4,12 +4,12 @@ Effective selection of population size projection for construction of the site f
 This is a relatively simple script. It was created for use with VCF files from RAD-style datasets. VCF file formats differ pretty dramatically so ymmv. Right now it's been tested and seems to run fine for VCF as output by both pyrad/ipyrad and tassel. 
 
 ## Dependencies
-The script assumes you have matplotlib and dadi installed. The easiest way to install matplotlib: `pip install matplotlib`. There is no easy way to install dadi, so you have to download and install from source:
-* git clone https://bitbucket.org/gutenkunstlab/dadi.git
-* `cd dadi`
-* `python setup.py install`
+The script assumes you have matplotlib and dadi installed.
 
 ## Install & Run
+* Install [miniconda for python3](https://docs.conda.io/en/latest/miniconda.html)
+* Create and activate a new environment: `conda create -n easySFS` & `conda activate easySFS`
+* Install dependencies: `conda install -c bioconda dadi pandas`
 * Clone this repo
  * `git clone https://github.com/isaacovercast/easySFS.git`
 * `cd easySFS`
