@@ -386,7 +386,7 @@ def get_inds_from_input(vcf_name, verbose):
     else:  
         ofunc = open
     try:
-        with ofunc(vcf_name, 'rU') as infile:
+        with ofunc(vcf_name, 'r') as infile:
             for line in infile:
                 if line.startswith('#'):
                     if line.startswith('#CHROM'):
@@ -454,7 +454,7 @@ def get_populations(pops_file, verbose=False):
     # windows/mac/linux newline issue.
 
     try:
-        with open(pops_file, 'rU') as popsfile:
+        with open(pops_file, 'r') as popsfile:
             ind2pop = {}
             pops = OrderedDict()
         
