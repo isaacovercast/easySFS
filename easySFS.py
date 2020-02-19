@@ -315,11 +315,13 @@ def read_input(vcf_name, all_snps=False, verbose=False):
     cur_loc_snps = []
 
     ## use gzip? 
+    read_mode = 'r'
     if vcf_name.endswith(".gz"):
+        read_mode = 'rt'
         ofunc = gzip.open
     else:  
         ofunc = open
-    infile = ofunc(vcf_name, 'r')
+    infile = ofunc(vcf_name, read_mode)
     lines = infile.readlines()
     infile.close()
 
@@ -381,12 +383,14 @@ def get_inds_from_input(vcf_name, verbose):
     # windows/mac/linux newline issue.
     ## use gzip? 
     indnames = []
+    read_mode = 'r'
     if vcf_name.endswith(".gz"):
+        read_mode = 'rt'
         ofunc = gzip.open
     else:  
         ofunc = open
     try:
-        with ofunc(vcf_name, 'r') as infile:
+        with ofunc(vcf_name, read_mode) as infile:
             for line in infile:
                 if line.startswith('#'):
                     if line.startswith('#CHROM'):
