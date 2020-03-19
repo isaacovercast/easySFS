@@ -118,5 +118,8 @@ optional arguments:
   -v                  Set verbosity. Dump tons of info to the screen
 ```
 
+## License
+[![License: CC BY 4.0](https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
+
 ## Credits
 `easySFS` is kind of a loose wrapper around `dadi`, which I use for internal sfs representation, and much of the grunt work.
