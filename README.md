@@ -1,11 +1,16 @@
 # easySFS
-TL;DR - Effective selection of population size projection for construction of the site frequency spectrum. Convert VCF to dadi/fastsimcoal style SFS for demographic analysis
+TL;DR - easySFS is a tool for the effective selection of population size projection for construction of the site frequency spectrum. It may be used to convert VCF to dadi/fastsimcoal/momi2 style SFS for demographic analysis.
 
+## Why is this needed?
 The site frequency spectrum can not be constructed in a coherent fashion on a data matrix with missing values. Missing data is a prominent feature of RADSeq-like datasets and simply removing sites with missingness would drastically throw out the majority of your data. One could also impute missing values, some people do this, but if you have lots of missing data the imputation will be unreliable. The down projection method is a sort of compromise between these two extremes. You "project down" to a smaller sample size and "average over" all possible resamplings to construct a complete data matrix. To be clear, I didn't invent this down projection strategy, I believe Marth et al 2004 get the credit here, I just made this python program for automating exploration of the projection values.
 
+## Choosing projection values
 In terms of how to choose projection values Gutenkunst et al 2009 provide a heuristic mechanism, suggesting that maximizing the number of segregating sites is the best strategy. Whether this is true or not is an open question at this point, but it's the best we've got, and it's what most people do, if they are being careful. EasySFS simply counts the number of segregating sites per projection value for each population. Then you may choose the projection value based on the results it displays.
 
+## A note on input VCF file format
 This is a relatively simple script. It was created for use with VCF files from RAD-style datasets. VCF file formats differ pretty dramatically so ymmv. Right now it's been tested and seems to run fine for VCF as output by both pyrad/ipyrad and tassel. 
+
+# Installation and operation
 
 ## Dependencies
 The script assumes you have matplotlib and dadi installed.
