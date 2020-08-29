@@ -125,12 +125,15 @@ def dadi_twoD_sfs_combinations(dd, pops, proj, unfold, outdir, prefix, dtype, ve
             with open(dadi_joint_filename) as infile:
                 ## Get the second line of the dadi-style sfs which contains the data
                 row_data = infile.readlines()[1].split()
-                ## The length of each row is determined by the number of columns which == the size of the projection for pop2
+                ## The length of each row is determined by the number of columns which == the size of the projection for pop1
                 ## Have to add 1 to the value of the projection because range stops after 'n' elements
                 ## but we want all n+1 elements from 0,1,2,..,n
-                row_size = projPairs[i][0] + 1
+                row_size = projPairs[i][1] + 1
                 ## Slice the row data into evenly sized chunks based on the number of columns
                 rows = [row_data[i:i + row_size] for i in range(0, len(row_data), row_size)]
+                ## dadi format writes bins 'backwards' from what we want here (i.e. pop2 bins
+                ## are first, and then pop1 bins), so we need to transpose the data
+                rows = np.array(rows).T
                 ## Sanity check. Make sure the number of rows you got is the same number you're expecting
                 ## to get (# rows should == size of pop0 projection)
                 if not len(row_headers) == len(rows):
