@@ -444,9 +444,9 @@ def check_inputs(ind2pop, indnames, pops):
                 print("Empty population, removing - {}".format(k))
                 pops.pop(k)
 
-        cont = raw_input("\nContinue, excluding samples not in both pops file and VCF? (yes/no)\n")
+        cont = input("\nContinue, excluding samples not in both pops file and VCF? (yes/no)\n")
         while not cont in ["yes", "no"]:
-            cont = raw_input("\nContinue, excluding samples not in both pops file and VCF? (yes/no)\n")
+            cont = input("\nContinue, excluding samples not in both pops file and VCF? (yes/no)\n")
         if cont == "no":
             sys.exit()
     return ind2pop, indnames, pops
