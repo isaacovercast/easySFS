@@ -557,14 +557,16 @@ def parse_command_line():
 def init(args):
     ## Set up output directory and output prefix
     outdir = args.outdir
-    if os.path.exists(outdir) and args.force == False:
+    dadi_dir = os.path.join(outdir, "dadi")
+    fsc_dir = os.path.join(outdir, "fastsimcoal2")
+
+    if os.path.exists(dadi_dir) and args.force == False:
         print("\nOutput directory exists. Use -f to override.\n")
         sys.exit()
-    if os.path.exists(outdir):
-        shutil.rmtree(outdir)
-    os.mkdir(outdir)
-    os.mkdir(os.path.join(outdir, "dadi"))
-    os.mkdir(os.path.join(outdir, "fastsimcoal2"))
+
+    for x in [outdir, dadi_dir, fsc_dir]:
+        if not os.path.exists(x):
+            os.mkdir(x)
 
     if not args.prefix:
         prefix = args.vcf_name.split('/')[-1].split('.')[0]
