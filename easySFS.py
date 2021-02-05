@@ -452,11 +452,13 @@ def check_inputs(ind2pop, indnames, pops):
     return ind2pop, indnames, pops
 
 
-def get_populations(pops_file, verbose=False):
+def get_populations(pops_file, pop_order=[], verbose=False):
     # Here we need to read in the individual population
     # assignments file and do this:
     # - populate the locs dictionary with each incoming population name
     # - populate another dictionary with individuals assigned to populations
+    # :param list pop_order: If specified, reorders the populations in the
+    #   returned pops dict. This matters for dadi 3 pop analysis.
     # Add the 'U' to handle opening files in universal mode, squashes the
     # windows/mac/linux newline issue.
 
@@ -497,6 +499,21 @@ def get_populations(pops_file, verbose=False):
         print("    Error - {}".format(inst))
         raise
 
+    if pop_order:
+        pop_order = [x for x in pop_order.split(",")]
+        if sorted(pop_order) != sorted(list(pops.keys())):
+            msg = """
+    Population names in `pop_order` must be identical to those in the pops
+    file. You have:
+
+        pop_order: {}
+
+        pops from file: {}""".format(pop_order, list(pops.keys()))
+            raise Exception(msg)
+
+        # Sort pops in order specified (py3 dicts are ordered by default).
+        pops = {pop:pops[pop] for pop in pop_order}
+
     return ind2pop, pops
 
 
@@ -532,6 +549,9 @@ def parse_command_line():
 
     parser.add_argument("--unfolded", dest="unfolded", action='store_true', 
         help="Generate unfolded SFS. This assumes that your vcf file is accurately polarized.")
+
+    parser.add_argument("--order", dest="pop_order",
+        help="Specify the order of populations for the generated sfs. Values for --proj should be in this order as well.")
 
     parser.add_argument("--dtype", dest="dtype", default="float",
         help="Data type for use in output sfs. Options are `int` and `float`. Default is `float`.")
@@ -593,7 +613,9 @@ def main():
     ## Get populations and populations assignments for individuals
     ## ind2pop - a dictionary mapping individuals to populations
     ## pops - a dictionary of populations and all inds w/in them
-    ind2pop, pops = get_populations(args.populations, args.verbose)
+    ind2pop, pops = get_populations(args.populations,
+                                    args.pop_order,
+                                    args.verbose)
 
     ## Read in the names of individuals present in the vcf file
     indnames = get_inds_from_input(args.vcf_name, args.verbose)
