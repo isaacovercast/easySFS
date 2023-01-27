@@ -309,7 +309,11 @@ def make_datadict(genotypes, pops, verbose=False, ploidy=1):
     return dd
 
 
-def read_input(vcf_name, all_snps=False, verbose=False):
+def read_input(vcf_name,
+                all_snps=False,
+                window_bp=0,
+                window_snp=0,
+                verbose=False):
 
     ## Counter to track which locus we're evaluating and a list
     ## to hold all lines for each locus so we can randomly
@@ -337,8 +341,13 @@ def read_input(vcf_name, all_snps=False, verbose=False):
     if verbose:
         print("  Number of snps in input file: {}".format(len(lines)))
 
-    ## Randomly select one snp per locus
-    if not all_snps:
+    ## Randomly select one snp per locus if not doing all_snps
+    ## or sampling in windows. The semantics for this could be more
+    ## straightforward. It kind of assumes a RAD by default mindset.
+    ##
+    ## This just randomly samples _lines_ from the vcf file which
+    ## will get converted to the genotype format later.
+    if not all_snps and not (window_bp or window_snp):
         print("  Sampling one snp per locus")
         loci_nums = set([x.split()[0] for x in lines])
         loc_dict = {}
@@ -377,6 +386,17 @@ def read_input(vcf_name, all_snps=False, verbose=False):
     ## lines now here has a list of either all snps in the input
     ## or a subset that includes only one snp per locus
     genotypes = pd.DataFrame([x.split() for x in lines], columns=header.split())
+
+    if window_bp or window_snp:
+        genotypes = _thin_windows(genotypes,
+                                    window_bp=window_bp,
+                                    window_snp=window_snp)
+
+    return genotypes
+
+
+def _thin_windows(genotypes, window_bp, window_snp):
+    import pdb; pdb.set_trace()
     return genotypes
 
 
@@ -560,10 +580,10 @@ def parse_command_line():
     parser.add_argument("--GQ", dest="GQual", 
         help="minimum genotype quality tolerated", default=20)
 
-    parser.add_argument("--window-bp", dest="window_bp", 
+    parser.add_argument("--window-bp", dest="window_bp", type=int,
         help="Select SNPs based on window size in base pairs", default=0)
 
-    parser.add_argument("--window-snp", dest="window_snp", 
+    parser.add_argument("--window-snp", dest="window_snp", type=int,
         help="Select SNPs based on window size in number of SNPs", default=0)
 
     parser.add_argument("-f", dest="force", action='store_true',
@@ -592,6 +612,10 @@ def parse_command_line():
     elif args.preview and args.projections:
         print("\n  Only one of --preview or --proj, not both\n")
         sys.exit()
+
+    ## If verbose lets show the input params
+    if args.verbose:
+        print("Input Arguments:\n\t{}".format(args))
 
     return args
 
@@ -623,9 +647,6 @@ def init(args):
 def main():
     args = parse_command_line()
 
-    if args.verbose:
-        print("Input Arguments:\n\t{}".format(args))
-
     ## Set up output directory and output prefix
     if args.preview:
         if args.verbose: print("Doing preview so skipping directory initialization")
@@ -648,7 +669,10 @@ def main():
         ind2pop, indnames, pops = check_inputs(ind2pop, indnames, pops)
 
     ## Reads the vcf and returns a pandas dataframe
-    genotypes = read_input(args.vcf_name, all_snps=args.all_snps,
+    genotypes = read_input(args.vcf_name,
+                            all_snps=args.all_snps,
+                            window_bp=args.window_bp,
+                            window_snp=args.window_snp,
                             verbose=args.verbose)
 
     ## Convert dataframe to dadi-style datadict
