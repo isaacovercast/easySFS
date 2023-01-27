@@ -387,7 +387,7 @@ def read_input(vcf_name,
     ## or a subset that includes only one snp per locus
     genotypes = pd.DataFrame([x.split() for x in lines], columns=header.split())
 
-    if window_bp or window_snp:
+    if (window_bp or window_snp) and not all_snps:
         genotypes = _thin_windows(genotypes,
                                     window_bp=window_bp,
                                     window_snp=window_snp)
@@ -399,7 +399,6 @@ def _thin_windows(genotypes, window_bp, window_snp):
 
     if window_snp > 0:
         sampled_gts = []
-
         CHROMS = genotypes["#CHROM"].unique()
         for c in CHROMS:
             ## Get the SNPs within this CHROM
@@ -414,7 +413,23 @@ def _thin_windows(genotypes, window_bp, window_snp):
         genotypes = pd.concat(sampled_gts)
 
     elif window_bp > 0:
-        pass
+        sampled_gts = []
+        CHROMS = genotypes["#CHROM"].unique()
+        for c in CHROMS:
+            ## Get the SNPs within this CHROM and all POS values
+            gt = genotypes[genotypes["#CHROM"] == c]
+            pos = gt["POS"].astype(int)
+            ## Walk the snps in windows of size window_bp and grab all snps
+            ## within these windows
+            dat = [gt[(pos >= x) & (pos <= y)] for x, y in zip(np.arange(0, pos.iloc[-1], window_bp),
+                                                          np.arange(window_bp, pos.iloc[-1]+window_bp, window_bp))]
+            ## Drop any windows that don't contain snps (empty series)
+            dat = [x for x in dat if len(x) > 0]
+            ## Grab one snp per window
+            sampled_gts.extend([x.sample() for x in dat])
+
+        genotypes = pd.concat(sampled_gts)
+
     else:
         ## Should be one or the other of window_snp or window_bp, not both
         pass
