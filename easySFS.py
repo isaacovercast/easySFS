@@ -467,7 +467,8 @@ def get_populations(pops_file, pop_order=[], verbose=False):
             ind2pop = {}
             pops = OrderedDict()
         
-            lines = popsfile.readlines()
+            ## Ignore blank lines
+            lines = [line for line in popsfile.readlines() if line.strip()]
             ## Get all the populations
             for line in lines:
                 pops.setdefault(line.split()[1], [])
