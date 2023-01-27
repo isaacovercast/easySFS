@@ -348,7 +348,7 @@ def read_input(vcf_name,
     ## This just randomly samples _lines_ from the vcf file which
     ## will get converted to the genotype format later.
     if not all_snps and not (window_bp or window_snp):
-        print("  Sampling one snp per locus")
+        print("  Sampling one snp per locus (CHROM)")
         loci_nums = set([x.split()[0] for x in lines])
         loc_dict = {}
         for loc in loci_nums:
@@ -396,7 +396,29 @@ def read_input(vcf_name,
 
 
 def _thin_windows(genotypes, window_bp, window_snp):
-    import pdb; pdb.set_trace()
+
+    if window_snp > 0:
+        sampled_gts = []
+
+        CHROMS = genotypes["#CHROM"].unique()
+        for c in CHROMS:
+            ## Get the SNPs within this CHROM
+            gt = genotypes[genotypes["#CHROM"] == c]
+            ## If nsnps in this CHROM < window_snps then set chunks to 1
+            chunks = max(1, np.round(len(gt)/window_snp))
+            ## np.array_split chunks the gt df in 'chunks' number of chunks
+            ## which value will approximately give one snp per window_snp.
+            ## Not exact, but +/- one snp in most cases.
+            sampled_gts.extend([x.sample() for x in np.array_split(gt, chunks)])
+
+        genotypes = pd.concat(sampled_gts)
+
+    elif window_bp > 0:
+        pass
+    else:
+        ## Should be one or the other of window_snp or window_bp, not both
+        pass
+
     return genotypes
 
 
