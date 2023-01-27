@@ -1,0 +1,12 @@
+1A_0    pop1
+1B_0    pop1
+1C_0    pop1
+1D_0    pop1
+2E_0    pop2
+2F_0    pop2
+2G_0    pop2
+2H_0    pop2
+3I_0    pop3
+3J_0    pop3
+3K_0    pop3
+3L_0    pop3
