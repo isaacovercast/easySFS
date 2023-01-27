@@ -559,6 +559,12 @@ def parse_command_line():
     parser.add_argument("--GQ", dest="GQual", 
         help="minimum genotype quality tolerated", default=20)
 
+    parser.add_argument("--window-bp", dest="window_bp", 
+        help="Select SNPs based on window size in base pairs", default=0)
+
+    parser.add_argument("--window-snp", dest="window_snp", 
+        help="Select SNPs based on window size in number of SNPs", default=0)
+
     parser.add_argument("-f", dest="force", action='store_true',
         help="Force overwriting directories and existing files.")
 
@@ -572,7 +578,22 @@ def parse_command_line():
 
     ## parse args
     args = parser.parse_args()
+
+    ## Sanity check
+    if args.all_snps and (args.window_bp or args.window_snp):
+        print("\n  Warning: -a will ignore both --window-snp and --window-bp\n")
+    elif args.window_bp and args.window_snp:
+        print("\n  Either --window-snp or --window-bp but not both\n")
+        sys.exit()
+    if not (args.preview or args.projections):
+        print("\n  Either --preview or --proj must be specified\n")
+        sys.exit()
+    elif args.preview and args.projections:
+        print("\n  Only one of --preview or --proj, not both\n")
+        sys.exit()
+
     return args
+
 
 def init(args):
     ## Set up output directory and output prefix
@@ -669,9 +690,9 @@ def main():
             ## Can't create momi file at this point because we're locked to python2 
             ## because of dadi. 
             pass
-
     else:
-        print("Either --preview or --proj must be specified.")
+        ## Should never reach here because we test for preview/projections in parse_args
+        pass
 
 if __name__ == "__main__":
     main()
