@@ -18,9 +18,8 @@ The script assumes you have matplotlib and dadi installed.
 ## Install & Run
 * Install [miniconda for python3](https://docs.conda.io/en/latest/miniconda.html)
 * Create and activate a new environment: `conda create -n easySFS` & `conda activate easySFS`
-* Install dependencies: `conda install -c bioconda dadi pandas`
-* Clone this repo
- * `git clone https://github.com/isaacovercast/easySFS.git`
+* Install dependencies: `conda install -c conda-forge numpy pandas scipy -y`
+* Clone this repo: `git clone https://github.com/isaacovercast/easySFS.git`
 * `cd easySFS`
 * `chmod 777 easySFS.py`
 * `./easySFS.py`
@@ -99,36 +98,39 @@ will be randomly sampled for inclusion in the output sfs.
 ## Usage
 You can get usage info any time by: `./easySFS.py`
 ```
-usage: easySFS.py [-h] [-a] -i VCF_NAME -p POPULATIONS [--proj PROJECTIONS]
-                  [--preview] [-o OUTDIR] [--ploidy PLOIDY] [--prefix PREFIX]
-                  [--unfolded] [--dtype DTYPE] [--GQ GQUAL] [-f] [-v]
+usage: easySFS.py [-h] -i VCF_NAME -p POPULATIONS [-o OUTDIR] [--proj PROJECTIONS] [--preview] [--ploidy PLOIDY]
+                  [--prefix PREFIX] [--unfolded] [--order POP_ORDER] [--dtype DTYPE] [--GQ GQUAL]
+                  [--total-length TOTAL_LENGTH] [--window-bp WINDOW_BP] [--window-snp WINDOW_SNP] [-a] [-f] [-v]
 
-optional arguments:
-  -h, --help          show this help message and exit
-  -a                  Keep all snps within each RAD locus (ie. do _not_
-                      randomly sample 1 snp per locus).
-  -i VCF_NAME         name of the VCF input file being converted
-  -p POPULATIONS      Input file containing population assignments per
-                      individual
-  --proj PROJECTIONS  List of values for projecting populations down to
-                      different sample sizes
-  --preview           Preview the number of segragating sites per population
-                      for different projection values.
-  -o OUTDIR           Directory to write output SFS to
-  --ploidy PLOIDY     Specify ploidy. Default is 2. Only other option is 1 for
-                      haploid.
-  --prefix PREFIX     Prefix for all output SFS files names.
-  --unfolded          Generate unfolded SFS. This assumes that your vcf file
-                      is accurately polarized.
-  --dtype DTYPE       Data type for use in output sfs. Options are `int` and
-                      `float`. Default is `float`.
-  --GQ GQUAL          minimum genotype quality tolerated
-  -f                  Force overwriting directories and existing files.
-  -v                  Set verbosity. Dump tons of info to the screen
+options:
+  -h, --help            show this help message and exit
+  -i VCF_NAME           name of the VCF input file being converted
+  -p POPULATIONS        Input file containing population assignments per individual
+  -o OUTDIR             Directory to write output SFS to
+  --proj PROJECTIONS    List of values for projecting populations down to different sample sizes
+  --preview             Preview the number of segragating sites per population for different projection values.
+  --ploidy PLOIDY       Specify ploidy. Default is 2. Only other option is 1 for haploid.
+  --prefix PREFIX       Prefix for all output SFS files names.
+  --unfolded            Generate unfolded SFS. This assumes that your vcf file is accurately polarized.
+  --order POP_ORDER     Specify the order of populations for the generated sfs. Values for --proj should be in this
+                        order as well.
+  --dtype DTYPE         Data type for use in output sfs. Options are `int` and `float`. Default is `float`.
+  --GQ GQUAL            minimum genotype quality tolerated
+  --total-length TOTAL_LENGTH
+                        total sequence length of input data (for accurate zero bin)
+  --window-bp WINDOW_BP
+                        Select SNPs based on window size in base pairs
+  --window-snp WINDOW_SNP
+                        Select SNPs based on window size in number of SNPs
+  -a                    Keep all snps within each RAD locus (ie. do _not_ randomly sample 1 snp per locus).
+  -f                    Force overwriting directories and existing files.
+  -v                    Set verbosity. Dump tons of info to the screen
 ```
 
 ## License
 [![License: CC BY 4.0](https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
 
 ## Credits
-`easySFS` is kind of a loose wrapper around `dadi`, which I use for internal sfs representation, and much of the grunt work.
+`easySFS` makes use of the `dadi.Spectrum` class which is borrowed from the [dadi package](https://dadi.readthedocs.io/en/latest/). If you use easySFS in your research please also cite:
+
+[RN Gutenkunst, RD Hernandez, SH Williamson, CD Bustamante "Inferring the joint demographic history of multiple populations from multidimensional SNP data" PLoS Genetics 5:e1000695 (2009).](http://doi.org/10.1093/molbev/msv255)
