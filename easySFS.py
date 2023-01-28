@@ -99,6 +99,13 @@ def dadi_twoD_sfs_combinations(dd, pops, proj, unfold, outdir, prefix, dtype, to
         dadi_joint_filename = os.path.join(dadi_dir, "-".join(pair)+".sfs")
         fs = Spectrum.from_data_dict(dd, list(pair), list(projPairs[i]), polarized=unfold)
 
+        if total_length > 0:
+            ## Sanity check
+            if total_length <= fs.data.sum():
+                raise Exception(BAD_TOTAL_LENGTH.format(total_length, np.round(fs.data.sum())))
+            ## [0][0] bin is the monomorphics
+            fs.data[0][0] += total_length - fs.data.sum()
+
         ## Do int bins rather than float
         if dtype == "int":
             dat = np.rint(np.array(fs.data))
