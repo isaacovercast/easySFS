@@ -313,6 +313,7 @@ def read_input(vcf_name,
                 all_snps=False,
                 window_bp=0,
                 window_snp=0,
+                resample_vcf=False,
                 verbose=False):
 
     ## Counter to track which locus we're evaluating and a list
@@ -339,58 +340,40 @@ def read_input(vcf_name,
     ## Just get the data lines, not the comments
     lines = [x for x in lines if not x.startswith('#')]
     if verbose:
-        print("  Number of snps in input file: {}".format(len(lines)))
+        print("  Total SNPs in input file: {}".format(len(lines)))
 
-    ## Randomly select one snp per locus if not doing all_snps
-    ## or sampling in windows. The semantics for this could be more
-    ## straightforward. It kind of assumes a RAD by default mindset.
-    ##
-    ## This just randomly samples _lines_ from the vcf file which
-    ## will get converted to the genotype format later.
-    if not all_snps and not (window_bp or window_snp):
-        print("  Sampling one snp per locus (CHROM)")
-        loci_nums = set([x.split()[0] for x in lines])
-        loc_dict = {}
-        for loc in loci_nums:
-            loc_dict[loc] = []
-
-        ## populate the loci dict
-        for line in lines:
-            loc_dict[line.split()[0]].append(line)
-
-        lines = []
-        for loc in loc_dict.values():
-            line = np.random.choice(loc, 1)[0]
-            lines.append(line)
-
-        ## Sanity check.
-        ## Some snp calling pipelines use the vcf Chrom/pos information to
-        ## convey read/snp info per locus (ipyrad), some just assign
-        ## all snps to one chrom and use pos/ID (tassel).
-        ## If the user chooses to randomly sample one snp per block and the
-        ## VCF doesn't use Chrom to indicate RAD loci then it'll just
-        ## sample one snp for the whole dataset.
-        if len(loc_dict) == 1:
-            msg = """
-    VCF file uses non-standard Chrom/pos information.
-    We assume that Chrom indicates RAD loci and pos indicates snps within each locus 
-    The VCF file passed does not have rad locus info in the Chrom field.
-
-    You can re-run the easySFS conversion with the `-a` flag to use all snps in the conversion."""
-            sys.exit(msg)
-
-        if verbose:
-            print("  Using n independent snps: {}".format(len(lines)))
-
-
-    ## lines now here has a list of either all snps in the input
-    ## or a subset that includes only one snp per locus
+    ## Convert to a sensible pd DataFrame format
     genotypes = pd.DataFrame([x.split() for x in lines], columns=header.split())
 
-    if (window_bp or window_snp) and not all_snps:
+    if resample_vcf:
+        ## Resample SNPs in the VCF _with_ replacement
+        genotypes = genotypes.iloc[sorted(np.random.choice(genotypes.index, len(genotypes)))]
+
+    ## Sanity check: Some snp calling pipelines use the vcf Chrom/pos information
+    ## to convey read/snp info per locus (ipyrad), some just assign  all snps to
+    ## one chrom and use pos/ID (tassel). If the user chooses to randomly sample
+    ## one snp per block and the VCF doesn't use Chrom to indicate RAD loci then
+    ## it'll just sample one snp for the whole dataset.
+    if len(genotypes["#CHROM"].unique()) == 1:
+        sys.exit(ERROR_ONE_CHROM)
+
+    if not (all_snps or window_bp or window_snp):
+        print("  Sampling one snp per locus (CHROM)")
+        ## Set window_snp to an astronomically high number to sample one
+        ## snp per locus/CHROM
+        window_snp = 1e10
+
+    if all_snps:
+        ## Use all snps so just pass the genotypes df straight back out
+        pass
+
+    elif (window_bp or window_snp):
         genotypes = _thin_windows(genotypes,
                                     window_bp=window_bp,
                                     window_snp=window_snp)
+
+    if verbose:
+        print(f"  Returning # sampled SNPs: {len(genotypes)}")
 
     return genotypes
 
@@ -536,10 +519,10 @@ def get_populations(pops_file, pop_order=[], verbose=False):
                 ind2pop[ind] = pop
                 pops[pop].append(ind)
 
-        print("Processing {} populations - {}".format(len( pops ), pops.keys()))
+        print(f"\n  Processing {len(pops)} populations - {list(pops.keys())}")
         if(verbose):
             for pop,ls in pops.items():
-                print(pop, ls)
+                print("    ", pop, ls)
 
     except Exception as inst:
         msg = """
@@ -581,23 +564,20 @@ def parse_command_line():
         epilog="""\n
     """)
 
-    parser.add_argument("-a", dest="all_snps", action='store_true', 
-        help="Keep all snps within each RAD locus (ie. do _not_ randomly sample 1 snp per locus).")
-
     parser.add_argument("-i", dest="vcf_name", required=True, 
         help="name of the VCF input file being converted")
 
     parser.add_argument("-p", dest="populations", required=True, 
         help="Input file containing population assignments per individual")
 
+    parser.add_argument("-o", dest="outdir", default='output', 
+        help="Directory to write output SFS to")
+
     parser.add_argument("--proj", dest="projections", 
         help="List of values for projecting populations down to different sample sizes")
 
     parser.add_argument("--preview", dest="preview", action='store_true',
         help="Preview the number of segragating sites per population for different projection values.")
-
-    parser.add_argument("-o", dest="outdir", default='output', 
-        help="Directory to write output SFS to")
 
     parser.add_argument("--ploidy", dest="ploidy", type=int, default=2,
         help="Specify ploidy. Default is 2. Only other option is 1 for haploid.")
@@ -622,6 +602,12 @@ def parse_command_line():
 
     parser.add_argument("--window-snp", dest="window_snp", type=int,
         help="Select SNPs based on window size in number of SNPs", default=0)
+
+    parser.add_argument("-a", dest="all_snps", action='store_true', 
+        help="Keep all snps within each RAD locus (ie. do _not_ randomly sample 1 snp per locus).")
+
+    parser.add_argument("--resample-vcf", dest="resample_vcf", action='store_true',
+        help=argparse.SUPPRESS)
 
     parser.add_argument("-f", dest="force", action='store_true',
         help="Force overwriting directories and existing files.")
@@ -710,6 +696,7 @@ def main():
                             all_snps=args.all_snps,
                             window_bp=args.window_bp,
                             window_snp=args.window_snp,
+                            resample_vcf=args.resample_vcf,
                             verbose=args.verbose)
 
     ## Convert dataframe to dadi-style datadict
@@ -755,6 +742,18 @@ def main():
     else:
         ## Should never reach here because we test for preview/projections in parse_args
         pass
+
+
+## ERROR and WARN messages
+
+ERROR_ONE_CHROM = """
+    VCF file uses non-standard Chrom/pos information.
+    We assume that Chrom indicates RAD loci and pos indicates snps within each locus 
+    The VCF file passed does not have rad locus info in the Chrom field.
+
+    You can re-run the easySFS conversion with the `-a` flag to use all snps in the conversion.
+    """
+
 
 if __name__ == "__main__":
     main()
