@@ -3,25 +3,22 @@
 '''
 this script only retains bi-allelic SNPs.
 '''
-from __future__ import print_function
 import matplotlib
 matplotlib.use('PDF')
-from collections import Counter
-from collections import OrderedDict
-from itertools import combinations
-import pandas as pd
-import numpy as np
 import argparse
-import shutil
-import gzip
 import copy
 import dadi
-import sys
-import os
-
+import gzip
 import matplotlib.pyplot as plt
-from matplotlib.backends.backend_pdf import PdfPages
+import numpy as np
+import os
+import pandas as pd
+import shutil
+import sys
 
+from collections import Counter, OrderedDict
+from itertools import combinations
+from matplotlib.backends.backend_pdf import PdfPages
 
 def dadi_preview_projections(dd, pops, ploidy, fold):
     msg = """
@@ -742,6 +739,8 @@ def main():
     else:
         ## Should never reach here because we test for preview/projections in parse_args
         pass
+
+
 
 
 ## ERROR and WARN messages
