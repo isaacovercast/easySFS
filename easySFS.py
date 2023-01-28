@@ -46,7 +46,7 @@ def dadi_preview_projections(dd, pops, ploidy, fold):
         print("\n")
 
 
-def dadi_oneD_sfs_per_pop(dd, pops, proj, unfold, outdir, prefix, dtype, verbose=False):
+def dadi_oneD_sfs_per_pop(dd, pops, proj, unfold, outdir, prefix, dtype, total_length=0, verbose=False):
     dadi_dir = os.path.join(outdir, "dadi")
     fsc_dir = os.path.join(outdir, "fastsimcoal2")
     M_or_D = "D" if unfold else "M"
@@ -55,6 +55,13 @@ def dadi_oneD_sfs_per_pop(dd, pops, proj, unfold, outdir, prefix, dtype, verbose
         dadi_sfs_file = os.path.join(dadi_dir, pop+"-"+str(proj[i])+".sfs")
 
         fs = Spectrum.from_data_dict(dd, [pop], [proj[i]], mask_corners=True, polarized=unfold)
+
+        if total_length > 0:
+            ## Sanity check
+            if total_length <= fs.data.sum():
+                raise Exception(BAD_TOTAL_LENGTH.format(total_length, np.round(fs.data.sum())))
+
+            fs.data[0] += total_length - fs.data.sum()
 
         ## Do int bins rather than float
         if dtype == "int":
@@ -74,7 +81,7 @@ def dadi_oneD_sfs_per_pop(dd, pops, proj, unfold, outdir, prefix, dtype, verbose
                 outfile.write("\n")
 
 
-def dadi_twoD_sfs_combinations(dd, pops, proj, unfold, outdir, prefix, dtype, verbose):
+def dadi_twoD_sfs_combinations(dd, pops, proj, unfold, outdir, prefix, dtype, total_length=0, verbose=False):
     dadi_dir = os.path.join(outdir, "dadi")
     fsc_dir = os.path.join(outdir, "fastsimcoal2")
     M_or_D = "D" if unfold else "M"
@@ -143,7 +150,7 @@ def dadi_twoD_sfs_combinations(dd, pops, proj, unfold, outdir, prefix, dtype, ve
                     outfile.write(row_head + "\t" + " ".join(rows[i]) + "\n")
 
 
-def dadi_multiSFS(dd, pops, proj, unfold, outdir, prefix, dtype, verbose=False):
+def dadi_multiSFS(dd, pops, proj, unfold, outdir, prefix, dtype, total_length=0, verbose=False):
     if verbose: print("Doing multiSFS for all pops")
     dadi_dir = os.path.join(outdir, "dadi")
     fsc_dir = os.path.join(outdir, "fastsimcoal2")
@@ -591,6 +598,9 @@ def parse_command_line():
     parser.add_argument("--GQ", dest="GQual", 
         help="minimum genotype quality tolerated", default=20)
 
+    parser.add_argument("--total-length", dest="total_length", type=float,
+        help="total sequence length of input data (for accurate zero bin)", default=0)
+
     parser.add_argument("--window-bp", dest="window_bp", type=int,
         help="Select SNPs based on window size in base pairs", default=0)
 
@@ -717,15 +727,18 @@ def main():
 
         ## Create 1D sfs for each population
         dadi_oneD_sfs_per_pop(dd, pops, proj=proj, unfold=args.unfolded,
-                                outdir=outdir, prefix=prefix, dtype=args.dtype, verbose=args.verbose)
+                                outdir=outdir, prefix=prefix, dtype=args.dtype,
+                                total_length=args.total_length, verbose=args.verbose)
 
         ## Create pairwise 2D sfs for each population
-        dadi_twoD_sfs_combinations(dd, pops, proj=proj, unfold=args.unfolded,\
-                                outdir=outdir, prefix=prefix, dtype=args.dtype, verbose=args.verbose)
+        dadi_twoD_sfs_combinations(dd, pops, proj=proj, unfold=args.unfolded,
+                                outdir=outdir, prefix=prefix, dtype=args.dtype,
+                                total_length=args.total_length, verbose=args.verbose)
 
         ## Create the full multiSFS for all popuations combined
         sfs_file = dadi_multiSFS(dd, pops, proj=proj, unfold=args.unfolded,
-                                outdir=outdir, prefix=prefix, dtype=args.dtype, verbose=args.verbose)
+                                outdir=outdir, prefix=prefix, dtype=args.dtype,
+                                total_length=args.total_length, verbose=args.verbose)
 
         try:
             import momi
@@ -742,6 +755,13 @@ def main():
 
 
 ## ERROR and WARN messages
+
+BAD_TOTAL_LENGTH = """
+    Bad `total-length` value: {}
+
+    Total length of input data must be greater than the sum of
+    SNPs in the dataset (nSNPs = {}).
+"""
 
 ERROR_ONE_CHROM = """
     VCF file uses non-standard Chrom/pos information.
