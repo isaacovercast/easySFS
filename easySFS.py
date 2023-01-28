@@ -162,6 +162,19 @@ def dadi_multiSFS(dd, pops, proj, unfold, outdir, prefix, dtype, total_length=0,
     ## Get the multiSFS
     fs = Spectrum.from_data_dict(dd, pops, proj, polarized=unfold)
 
+    if total_length > 0:
+        ## Sanity check
+        if total_length <= fs.data.sum():
+            raise Exception(BAD_TOTAL_LENGTH.format(total_length, np.round(fs.data.sum())))
+        ## This is a little tricky because the sfs could be of arbitrary dimension
+        ## and we have to update the zeroth element.
+        ## * Get the value of the zeroth element (# monomorphics in the vcf data)
+        ## * Get an index to the zeroth element of the multiSFS
+        ## * Update the zeroth element subtracting only variable sites from total_length
+        monomorphics = np.take(fs.data, 0)
+        idx = [0]*fs.data.ndim
+        np.put(fs.data, idx, total_length - fs.data.sum() + monomorphics)
+
     ## Do int bins rather than float
     if dtype == "int":
         dat = np.rint(np.array(fs.data))
@@ -353,12 +366,12 @@ def read_input(vcf_name,
         ## Resample SNPs in the VCF _with_ replacement
         genotypes = genotypes.iloc[sorted(np.random.choice(genotypes.index, len(genotypes)))]
 
-    ## Sanity check: Some snp calling pipelines use the vcf Chrom/pos information
+    ## Sanity check: Some snp calling pipelines use the vcf CHROM/POS information
     ## to convey read/snp info per locus (ipyrad), some just assign  all snps to
     ## one chrom and use pos/ID (tassel). If the user chooses to randomly sample
-    ## one snp per block and the VCF doesn't use Chrom to indicate RAD loci then
+    ## one snp per block and the VCF doesn't use CHROM to indicate RAD loci then
     ## it'll just sample one snp for the whole dataset.
-    if len(genotypes["#CHROM"].unique()) == 1:
+    if len(genotypes["#CHROM"].unique()) == 1 and not all_snps:
         sys.exit(ERROR_ONE_CHROM)
 
     if not (all_snps or window_bp or window_snp):
@@ -760,8 +773,8 @@ def main():
 ## ERROR and WARN messages
 
 BAD_TOTAL_LENGTH = """
-    Bad `total-length` value: {}
 
+    Bad `total-length` value: {}
     Total length of input data must be greater than the sum of
     SNPs in the dataset (nSNPs = {}).
 """
