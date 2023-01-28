@@ -12,9 +12,6 @@ This is a relatively simple script. It was created for use with VCF files from R
 
 # Installation and operation
 
-## Dependencies
-The script assumes you have matplotlib and dadi installed.
-
 ## Install & Run
 * Install [miniconda for python3](https://docs.conda.io/en/latest/miniconda.html)
 * Create and activate a new environment: `conda create -n easySFS` & `conda activate easySFS`
