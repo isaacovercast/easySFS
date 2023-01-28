@@ -39,10 +39,6 @@ def dadi_preview_projections(dd, pops, ploidy, fold):
             s = fs.S()
             seg_sites[x] = round(s)
             print("({}, {})".format(x, round(s)), end="\t")
-        print("")
-        ## Old way that's a little uglier
-        #for x in range(2,len(pops[pop])):
-        #    print(seg_sites[x], end="\t")
         print("\n")
 
 
