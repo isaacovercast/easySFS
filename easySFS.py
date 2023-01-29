@@ -3,10 +3,7 @@
 '''
 this script only retains bi-allelic SNPs.
 '''
-import matplotlib
-matplotlib.use('PDF')
 import argparse, copy, gzip, os, shutil, sys
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
@@ -14,7 +11,6 @@ from Spectrum import Spectrum
 
 from collections import Counter, OrderedDict
 from itertools import combinations
-from matplotlib.backends.backend_pdf import PdfPages
 
 
 def dadi_preview_projections(dd, pops, ploidy, fold):
@@ -301,8 +297,8 @@ def make_datadict(genotypes, pops, verbose=False, ploidy=1):
     dd = {}
 
     ## Get genotype counts for each population
-    for row in genotypes.iterrows():
-        ## iterrows() returns a tuple for some reason
+    for sidx, row in enumerate(genotypes.iterrows()):
+        ## iterrows() returns a tuple of (index, series)
         row = row[1]
 
         calls = {}
@@ -319,7 +315,8 @@ def make_datadict(genotypes, pops, verbose=False, ploidy=1):
             alt_count += het_count
             calls[pop] = (ref_count, alt_count)
 
-        dd[row["#CHROM"]+"-"+row["POS"]] =\
+        ## Ensure CHROM/POS dd keys are unique with sidx
+        dd[row["#CHROM"]+"-"+row["POS"]+"-"+str(sidx)] =\
             {"segregating":[row["REF"], row["ALT"]],\
             "calls":calls,\
             "outgroup_allele":row["REF"]}
