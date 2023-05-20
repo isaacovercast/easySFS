@@ -127,7 +127,14 @@ options:
 ## License
 [![License: CC BY 4.0](https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
 
+## References
+Other relevant papers of interest:
+
+[Coffman et al "Computationally Efficient Composite Likelihood Statistics for Demographic Inference" (2015)](http://doi.org/10.1093/molbev/msv255)
+
+
 ## Credits
 `easySFS` makes use of the `dadi.Spectrum` class which is borrowed from the [dadi package](https://dadi.readthedocs.io/en/latest/). If you use easySFS in your research please also cite:
 
-[RN Gutenkunst, RD Hernandez, SH Williamson, CD Bustamante "Inferring the joint demographic history of multiple populations from multidimensional SNP data" PLoS Genetics 5:e1000695 (2009).](http://doi.org/10.1093/molbev/msv255)
+[RN Gutenkunst, RD Hernandez, SH Williamson, CD Bustamante "Inferring the joint demographic history of multiple populations from multidimensional SNP data" PLoS Genetics 5:e1000695 (2009).](https://doi.org/10.1371/journal.pgen.1000695)
+
