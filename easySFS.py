@@ -306,13 +306,22 @@ def make_datadict(genotypes, pops, verbose=False, ploidy=1):
             ## If there is a bunch of info associated w/ each snp then
             ## just carve it off for now.
             pop_genotypes = [row[x].split(":")[0] for x in pops[pop]]
-            ref_count = sum([x == "0" or x == "0/0" or x == "0|0" for x in pop_genotypes]) * ploidy
-            alt_count = sum([x == "1" or x == "1/1" or x == "1|1" for x in pop_genotypes]) * ploidy
-            ## Haploids shouldn't have hets in the vcf 
-            het_count = sum([x == "1/0" or x == "0/1" or x == "1|0" or x == "0|1" for x in pop_genotypes])
+            if ploidy > 2:
+                delim = "/"
+                if "|" in pop_genotypes[0]: delim = "|"
+                gts = np.array([x.split(delim) for x in pop_genotypes]).ravel()
+                ref_count = np.sum(gts == '0')
+                alt_count = np.sum(gts == '1')
+            else:
+                ## Assuming haploid or diploid
+                ref_count = sum([x == "0" or x == "0/0" or x == "0|0" for x in pop_genotypes]) * ploidy
+                alt_count = sum([x == "1" or x == "1/1" or x == "1|1" for x in pop_genotypes]) * ploidy
+                ## Haploids shouldn't have hets in the vcf
+                het_count = sum([x == "1/0" or x == "0/1" or x == "1|0" or x == "0|1" for x in pop_genotypes])
 
-            ref_count += het_count
-            alt_count += het_count
+                ref_count += het_count
+                alt_count += het_count
+
             calls[pop] = (ref_count, alt_count)
 
         ## Ensure CHROM/POS dd keys are unique with sidx
