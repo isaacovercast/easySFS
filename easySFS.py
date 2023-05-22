@@ -309,7 +309,8 @@ def make_datadict(genotypes, pops, verbose=False, ploidy=1):
             if ploidy > 2:
                 delim = "/"
                 if "|" in pop_genotypes[0]: delim = "|"
-                gts = np.array([x.split(delim) for x in pop_genotypes]).ravel()
+                gts = np.array([np.array(x.split(delim)) for x in pop_genotypes], dtype=object)
+                gts = np.concatenate(gts)
                 ref_count = np.sum(gts == '0')
                 alt_count = np.sum(gts == '1')
             else:
