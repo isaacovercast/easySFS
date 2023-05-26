@@ -78,6 +78,8 @@ The example files are different enough where they will give you an idea of what 
 Preview: `./easySFS.py -i example_files/wcs_1200.vcf -p example_files/wcs_pops.txt --preview -a`<br>
 Convert: `./easySFS.py -i example_files/wcs_1200.vcf -p example_files/wcs_pops.txt -a --proj=7,7`
 
+**NB:** `--proj=7,7` is only an example of the *format* of the --proj flag. The recommended `--proj` for the example data would be `--proj=50,134`.
+
 The `-a` flag specifies that all snps in the vcf should be used. Also, notice the `--ploidy` 
 flag is not required since diploid is the default.
 
