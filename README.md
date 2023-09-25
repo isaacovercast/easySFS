@@ -24,7 +24,7 @@ This is a relatively simple script. It was created for use with VCF files from R
 ## General workflow
 Converting VCF to SFS is a 2 step process. The first step is to run a preview to identify the values for projecting down each population. The second step is to actually do the conversion specifying the projection values. It looks like this:
 
-`./easySFS -i input.vcf -p pops_file.txt --preview`
+`./easySFS.py -i input.vcf -p pops_file.txt --preview`
 
 Which will output something like this:
 ```
@@ -39,7 +39,7 @@ The dadi manual recommends maximizing the number of segregating sites, but at th
 
 Next run the script with the values for projecting for each population, like this:
 
-`./easySFS -i input.vcf -p pops_file.txt --proj 12,20`
+`./easySFS.py -i input.vcf -p pops_file.txt --proj 12,20`
 
 ## Input files
 Two input files are required, the VCF and the population specification file. VCF in the format as written out by pyrad/ipyrad is known to work well, other vcf formats may work too, but aren't guaranteed. The population assignment file is a plain text file with two columns, one for sample names and one for the population the sample belongs to, like this:
@@ -125,6 +125,9 @@ options:
   -f                    Force overwriting directories and existing files.
   -v                    Set verbosity. Dump tons of info to the screen
 ```
+
+## Endorsements
+* "It _really_ is easy." - Dr. Drew Schield
 
 ## License
 [![License: CC BY 4.0](https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
