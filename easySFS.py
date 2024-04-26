@@ -305,7 +305,10 @@ def make_datadict(genotypes, pops, verbose=False, ploidy=1):
         for pop in pops.keys():
             ## If there is a bunch of info associated w/ each snp then
             ## just carve it off for now.
-            pop_genotypes = [row[x].split(":")[0] for x in pops[pop]]
+            try:
+                pop_genotypes = [row[x].split(":")[0] for x in pops[pop]]
+            except:
+                import pdb; pdb.set_trace()
             if ploidy > 2:
                 delim = "/"
                 if "|" in pop_genotypes[0]: delim = "|"
@@ -744,8 +747,8 @@ def main():
         proj = [int(x) for x in args.projections.split(",")]
         if not len(pops) == len(proj):
 
-            msg = "You must pass in the same number of values for projection as you have populations specified"
-            msg += "\n\nN pops = {}\nN projections = {}\nProjections = {}".format(len(pops), len(proj), proj)
+            msg = "  **ERROR**\n    You must pass in the same number of values for projection as you have populations specified"
+            msg += "\n\n    N pops in pops file = {}\n    N pop projections requested  = {}\t\tProjections = {}".format(len(pops), len(proj), proj)
             sys.exit(msg)
 
         ## Create 1D sfs for each population
