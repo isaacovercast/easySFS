@@ -485,7 +485,7 @@ def get_inds_from_input(vcf_name, verbose):
     return indnames
 
     
-def check_inputs(ind2pop, indnames, pops):
+def check_inputs(ind2pop, indnames, pops, no_prompt=False):
     ## Make sure all samples are present in both pops file and VCF, give the user the option
     ## to bail out if something is goofy
     pop_set = set(ind2pop.keys())
@@ -511,11 +511,14 @@ def check_inputs(ind2pop, indnames, pops):
                 print("Empty population, removing - {}".format(k))
                 pops.pop(k)
 
-        cont = input("\nContinue, excluding samples not in both pops file and VCF? (yes/no)\n")
-        while not cont in ["yes", "no"]:
+        if no_prompt:
+            print("Continuing with samples present in both pops file and VCF.")
+        else:
             cont = input("\nContinue, excluding samples not in both pops file and VCF? (yes/no)\n")
-        if cont == "no":
-            sys.exit()
+            while not cont in ["yes", "no"]:
+                cont = input("\nContinue, excluding samples not in both pops file and VCF? (yes/no)\n")
+            if cont == "no":
+                sys.exit()
     return ind2pop, indnames, pops
 
 
@@ -642,6 +645,9 @@ def parse_command_line():
     parser.add_argument("-f", dest="force", action='store_true',
         help="Force overwriting directories and existing files.")
 
+    parser.add_argument("-y", dest="no_prompt", action='store_true',
+        help="Do not prompt if pop file and vcf do not agree on sample names.")
+
     parser.add_argument("-v", dest="verbose", action='store_true',
         help="Set verbosity. Dump tons of info to the screen")
 
@@ -719,7 +725,10 @@ def main():
     ## Check whether inds exist in the population mapping and input vcf
     ## files. Give the user an opportunity to bail if there is a mismatch.
     if not args.force:
-        ind2pop, indnames, pops = check_inputs(ind2pop, indnames, pops)
+        ind2pop, indnames, pops = check_inputs(ind2pop,
+                                                indnames,
+                                                pops,
+                                                args.no_prompt)
 
     ## Reads the vcf and returns a pandas dataframe
     genotypes = read_input(args.vcf_name,
