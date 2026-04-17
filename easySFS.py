@@ -418,7 +418,9 @@ def _thin_windows(genotypes, window_bp, window_snp):
             ## np.array_split chunks the gt df in 'chunks' number of chunks
             ## which value will approximately give one snp per window_snp.
             ## Not exact, but +/- one snp in most cases.
-            sampled_gts.extend([x.sample() for x in np.array_split(gt, chunks)])
+            splits = np.array_split(gt.index, chunks)
+            gt_chunks = [gt.loc[idx] for idx in splits]
+            sampled_gts.extend([x.sample() for x in gt_chunks])
 
         genotypes = pd.concat(sampled_gts)
 
